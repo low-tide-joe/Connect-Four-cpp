@@ -28,20 +28,38 @@ private:
         return (combined & topOfColumn) != 0;
     }
 
+    // Checks if a specific row & column position is set among any of the bitboards
     bool isSet(int row, int col) {
         Bitboard combined = boards[0] | boards[1];
         Bitboard mask = 1ULL << (row * 7) + col;
         return (mask & combined) == 0;
     }
 
+    bool checkHorizontalWin(Bitboard board) {
+        // Iterate through each row
+        for (int row = 0; row < 6; ++row) {
+            // Extract just the bits for this row
+            Bitboard rowBits = (board >> (row * 7)) & 0x7F;
+            
+            // Look for four in a row within this row
+            for (int shift = 0; shift <= 3; ++shift) {
+                if ((rowBits & (0xF << shift)) == (0xF << shift)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Checks if a connect 4 has been completed
     bool checkWin(Bitboard board) {
         // Vertical win check
         Bitboard vertical = board & (board >> 7);
-        if (vertical & (vertical >> 14)) return true;
+        vertical &= (vertical >> 7);
+        if (vertical & (vertical >> 7)) return true;
 
         // Horizontal win check
-        Bitboard horizontal = board & (board >> 1);
-        if (horizontal & (horizontal >> 2)) return true;
+        if (checkHorizontalWin(board)) return true;
 
         // Diagonal (top-left to bottom-right) win check
         Bitboard diag1 = board & (board >> 6);
@@ -54,6 +72,7 @@ private:
         return false;
     }
 
+    // Checks for drawn game
     bool isBoardFull() {
         Bitboard combined = boards[0] | boards[1];
         for (int col = 0; col <= 7; ++col) {
@@ -98,7 +117,6 @@ public:
 
                 if (isSet(row, col) && !isColumnFull(col)) {
                     setBit(currentPlayer, row, col);
-                    currentPlayer ^= 1;
 
                     if (checkWin(boards[currentPlayer])) {
                         gameState = 1;
@@ -107,6 +125,7 @@ public:
                         gameState = 2;
                         return;
                     }
+                    currentPlayer ^= 1;
 
                     break;
                     return;
@@ -114,6 +133,7 @@ public:
             }
         }
 };
+
 
 int chooseRandomColumn() {
     static std::random_device rd;
@@ -123,18 +143,20 @@ int chooseRandomColumn() {
     return distrib(gen);
 }
 
+
 int main() {
     ConnectFourBitboard game;
+    int randomMove;
 
     while (game.gameState == 0) {
-        int randomMove = chooseRandomColumn();
+        randomMove = chooseRandomColumn();
         game.makeMove(randomMove);
     }
 
     game.printBoard();
 
     std::string endGameMessage = (game.gameState == 1) ? "Player " + std::to_string(game.currentPlayer + 1) + " Wins!" : "Draw Game.";
-    std::cout << endGameMessage << std::endl;
+    std::cout << endGameMessage << "\nLast move played was in column " << std::to_string(randomMove) << " by player: " << std::to_string(game.currentPlayer + 1) << std::endl;
 
     return 0;
 }
