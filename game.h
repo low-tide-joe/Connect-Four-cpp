@@ -37,6 +37,23 @@ private:
         return (mask & combined) == 0;
     }
 
+    bool checkVerticalWin(Bitboard board) {
+        for (int col = 0; col < 7; ++col) {
+            Bitboard colBits = 0;
+            for (int row = 0; row < 6; ++row) {
+                Bitboard position = (row * 7) + col;
+                colBits |= ((board & (1ULL << position)) != 0) << row;
+            }
+
+            for (int shift = 0; shift <= 2; ++shift) {
+                if ((colBits & (0xF << shift)) == (0xF << shift)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     bool checkHorizontalWin(Bitboard board) {
         // Iterate through each row
         for (int row = 0; row < 6; ++row) {
@@ -53,23 +70,56 @@ private:
         return false;
     }
 
+    bool checkDiagonalWin(Bitboard board) {
+        for (int row = 0; row < 6; ++row) {
+            for (int col = 0; col < 7; ++col) {
+                Bitboard position = (row * 7) + col;
+                // Upward diagonal
+                if (row <= 2 && col <= 3) {
+                    if (
+                        ((board & (1ULL << position)) != 0) &&
+                        ((board & (1ULL << (position + 8))) != 0) &&
+                        ((board & (1ULL << (position + 16))) != 0) &&
+                        ((board & (1ULL << (position + 24))) != 0)
+                    ) {
+                        return true;
+                    }
+                }
+
+                if (row >= 3 && col <= 3) {
+                    if (
+                        ((board & (1ULL << position)) != 0) &&
+                        ((board & (1ULL << (position - 6))) != 0) &&
+                        ((board & (1ULL << (position - 12))) != 0) &&
+                        ((board & (1ULL << (position - 18))) != 0) 
+                    ) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     // Checks if a connect 4 has been completed
     bool checkWin(Bitboard board) {
         // Vertical win check
-        Bitboard vertical = board & (board >> 7);
-        vertical &= (vertical >> 7);
-        if (vertical & (vertical >> 7)) return true;
+        if (checkVerticalWin(board)) {
+            std::cout << "Vertical Win" << std::endl;
+            return true;
+        }
 
         // Horizontal win check
-        if (checkHorizontalWin(board)) return true;
+        if (checkHorizontalWin(board)) {
+            std::cout << "Horizontal Win" << std::endl;
+            return true;
+        }
 
-        // Diagonal (top-left to bottom-right) win check
-        Bitboard diag1 = board & (board >> 6);
-        if (diag1 & (diag1 >> 12)) return true;
-
-        // Diagonal (top-right to bottom-left) win check
-        Bitboard diag2 = board & (board >> 8);
-        if (diag2 & (diag2 >> 16)) return true;
+        // Diagonal win check
+        if (checkDiagonalWin(board)) {
+            std::cout << "Diagonal Win" << std::endl;
+            return true;
+        }
 
         return false;
     }
