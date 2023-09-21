@@ -105,19 +105,19 @@ private:
     bool checkWin(Bitboard board) {
         // Vertical win check
         if (checkVerticalWin(board)) {
-            std::cout << "Vertical Win" << std::endl;
+            //std::cout << "Vertical Win" << std::endl;
             return true;
         }
 
         // Horizontal win check
         if (checkHorizontalWin(board)) {
-            std::cout << "Horizontal Win" << std::endl;
+            //std::cout << "Horizontal Win" << std::endl;
             return true;
         }
 
         // Diagonal win check
         if (checkDiagonalWin(board)) {
-            std::cout << "Diagonal Win" << std::endl;
+            //std::cout << "Diagonal Win" << std::endl;
             return true;
         }
 
