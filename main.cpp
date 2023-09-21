@@ -17,7 +17,7 @@ int main() {
     int player2WinCount = 0;
     int draws = 0;
 
-    for (int i = 0; i <= 10000; ++i) {
+    for (int i = 0; i <= 1000000; ++i) {
         while (game.gameState == 0) {
             randomMove = chooseRandomColumn();
             game.makeMove(randomMove);
@@ -28,7 +28,7 @@ int main() {
         } else if (game.gameState == 2) {
             draws++;
         }
-        std::cout << "Game " << i << " completed, Game state = " << game.gameState << std::endl;
+        //std::cout << "Game " << i << " completed, Game state = " << game.gameState << std::endl;
         game.reset();
     }
 
