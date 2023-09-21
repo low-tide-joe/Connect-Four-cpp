@@ -2,9 +2,6 @@
 
 #include <iostream>
 #include <cstdint>
-#include <cmath>
-#include <vector>
-#include <random>
 
 using Bitboard = uint64_t;
 
@@ -127,10 +124,9 @@ private:
     // Checks for drawn game
     bool isBoardFull() {
         Bitboard combined = boards[0] | boards[1];
-        for (int col = 0; col <= 7; ++col) {
+        for (int col = 0; col < 7; ++col) {
             if (!isColumnFull(col)) {
                 return false;
-                break;
             }
         }
         return true;
@@ -158,7 +154,6 @@ public:
     std::cout << "-----------------\n";
     }
 
-    // Returns -1 if invalid move, 0 if game is still going, 1 if win condition was detected, 2 if board is full and no win detected
     void makeMove(int col) {
         if (col < 0 || col > 7) {
             return;
@@ -184,4 +179,11 @@ public:
                 } 
             }
         }
+
+    void reset() {
+        boards[0] = 0;
+        boards[1] = 0;
+        currentPlayer = 0;
+        gameState = 0;
+    }
 };
