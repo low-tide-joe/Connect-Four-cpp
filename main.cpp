@@ -1,5 +1,5 @@
 #include <random>
-#include "game.h"
+#include "game.hpp"
 
 int chooseRandomColumn() {
     static std::random_device rd;
@@ -17,7 +17,7 @@ int main() {
     int player2WinCount = 0;
     int draws = 0;
 
-    for (int i = 0; i <= 1000000; ++i) {
+    for (int i = 0; i <= 100; ++i) {
         while (game.gameState == 0) {
             randomMove = chooseRandomColumn();
             game.makeMove(randomMove);
