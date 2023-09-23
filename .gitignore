@@ -1,2 +1,8 @@
 main.exe
 .vscode
+pybind11
+.gitmodules
+dist
+build
+ConnectFourBitboard.egg-info
+setup.py

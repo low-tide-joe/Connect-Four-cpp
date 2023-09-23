@@ -1,5 +1,5 @@
 #include <random>
-#include "game.cpp"
+#include "src/game.cpp"
 
 int chooseRandomColumn() {
     static std::random_device rd;
