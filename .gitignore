@@ -6,3 +6,4 @@ dist
 build
 ConnectFourBitboard.egg-info
 setup.py
+CMakeLists.txt
