@@ -7,3 +7,5 @@ build
 ConnectFourBitboard.egg-info
 setup.py
 CMakeLists.txt
+python_venv2
+__pycache__

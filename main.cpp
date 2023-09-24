@@ -1,12 +1,21 @@
 #include <random>
+#include <bitset>
 #include "src/game.cpp"
 
-int chooseRandomColumn() {
+int chooseRandomColumn(const std::vector<int> &availableActions) {
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib(0, 7);
+    std::uniform_int_distribution<> distr(0, availableActions.size() - 1);
 
-    return distrib(gen);
+    if (availableActions.empty()) {
+        std::cerr << "Vector empty!\n";
+        return -1;
+    }
+    
+    int random_index = distr(gen);
+    int random_element = availableActions[random_index];
+
+    return random_element;
 }
 
 
@@ -19,9 +28,13 @@ int main() {
     int draws = 0;
 
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 1000000; ++i) {
         while (game.gameState == 0) {
-            randomMove = chooseRandomColumn();
+            std::vector<int> availableActions = game.getAvailableActions();
+            randomMove = chooseRandomColumn(availableActions);
+            if (randomMove == -1) {
+                break;
+            }
             game.makeMove(randomMove);
         }
 
@@ -30,7 +43,6 @@ int main() {
         } else if (game.gameState == 2) {
             draws++;
         }
-        //std::cout << "Game " << i << " completed, Game state = " << game.gameState << std::endl;
         game.reset();
     }
 

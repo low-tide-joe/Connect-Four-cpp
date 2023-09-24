@@ -2,12 +2,13 @@
 
 #include <iostream> 
 #include <cstdint>
+#include <vector>
 
 using Bitboard = uint64_t;
 
 class ConnectFourBitboard {
 private:
-  Bitboard boards[2] = {0, 0};
+  Bitboard boards[2] = {0, 0}; 
   void setBit(int currentPlayer, int row, int col);
   bool isColumnFull(int col);
   bool isSet(int row, int col);
@@ -16,6 +17,7 @@ private:
   bool checkDiagonalWin(Bitboard board);
   bool checkWin(Bitboard board);
   bool isBoardFull();
+  std::vector<int> availableActions;
 
 public:
   int gameState = 0;
@@ -23,5 +25,7 @@ public:
   void printBoard();
   void makeMove(int col);
   void reset();  
+  Bitboard getPlayerBoardState(int player);
+  const std::vector<int>& getAvailableActions();
   
 };

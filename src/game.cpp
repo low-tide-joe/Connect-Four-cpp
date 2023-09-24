@@ -172,6 +172,24 @@ void ConnectFourBitboard::makeMove(int col) {
 }
 
 
+Bitboard ConnectFourBitboard::getPlayerBoardState(int player) {
+    if (player < 0 || player >= 2) throw std::out_of_range("Invalid Player");
+    return boards[player];
+}
+
+
+const std::vector<int>& ConnectFourBitboard::getAvailableActions() {
+    availableActions.clear();
+    availableActions.reserve(7);
+    for (int col = 0; col < 7; ++col) {
+        if (!isColumnFull(col)) {
+            availableActions.push_back(col);
+        }
+    }
+    return availableActions;
+}
+
+
 void ConnectFourBitboard::reset() {
     boards[0] = 0;
     boards[1] = 0;

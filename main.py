@@ -1,28 +1,43 @@
 import ConnectFourBitboard as g
-import random as rnd
-
+import numpy as np
+import random 
+import QLearnAgent
 
 game = g.ConnectFourBitboard()
 
-player1wins = 0
-player2wins = 0
-draws = 0
-
-for i in range(0, 10000):
-    while (game.gameState == 0):
-        randomColumn = rnd.randint(0, 6)
-        game.makeMove(randomColumn)
-    
-    if (game.gameState == 1):
+def get_reward(game):
+    if game.gameState == 0:
+        return 0
+    elif game.gameState == 1:
         if game.currentPlayer == 0:
-            player1wins += 1
+            return 1 # Player 1 wins
         else:
-            player2wins += 1
-    elif game.gameState == 2:
-        draws += 1
-    
+            return -1 # Player 2 wins
+    elif game.gameState == 2: # draw game
+        return 0
+
+
+agent = QLearnAgent.QLearningAgent()
+
+num_episodes = 10000
+
+for i in range(num_episodes):
     game.reset()
+    while game.gameState == 0:
+        player1_bitboard = game.getPlayerBoardState(0)
+        player2_bitboard = game.getPlayerBoardState(1)
+        state_key = (player1_bitboard, player2_bitboard) 
 
+        available_actions = game.getAvailableActions()
+        action = agent.select_action(state_key, available_actions)
 
-print("Player 1 wins: " + str(player1wins) + "\nPlayer 2 wins: " + str(player2wins) + "\nDraws: " + str(draws))
+        game.makeMove(action)
 
+        reward = get_reward(game)
+
+        next_player1_bitboard = game.getPlayerBoardState(0)
+        next_player2_bitboard = game.getPlayerBoardState(1)
+        next_state_key = (next_player1_bitboard, next_player2_bitboard)
+
+        agent.update_q_value(state_key, action, reward, next_state_key)
+        
