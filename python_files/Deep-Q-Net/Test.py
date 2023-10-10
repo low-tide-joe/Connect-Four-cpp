@@ -1,12 +1,14 @@
 from DQN import QNetwork
 import ConnectFourBitboard as g
 import torch
-from Train import state_to_tensor
-from Train import device
+from DQN import state_to_tensor
 
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model_path = "model_states/DQN_Model.pth"
 
 loaded_model = QNetwork().to(device)
-loaded_model.load_state_dict(torch.load("model_states/model.pth"))
+loaded_model.load_state_dict(torch.load(model_path))
 loaded_model.eval()
 
 
