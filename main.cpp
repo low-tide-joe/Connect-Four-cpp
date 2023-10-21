@@ -28,7 +28,7 @@ int main() {
     int draws = 0;
 
 
-    for (int i = 0; i < 1000000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         while (game.gameState == 0) {
             std::vector<int> availableActions = game.getAvailableActions();
             randomMove = chooseRandomColumn(availableActions);
