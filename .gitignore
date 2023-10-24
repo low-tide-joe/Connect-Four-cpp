@@ -1,12 +1,11 @@
 main.exe
 .vscode
-pybind11
 .gitmodules
+pybind11
 dist
 build
 ConnectFourBitboard.egg-info
 .venv
-CMakeLists.txt
 python_venv2
 __pycache__
 model_states

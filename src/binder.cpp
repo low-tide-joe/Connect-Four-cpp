@@ -16,6 +16,7 @@ PYBIND11_MODULE(ConnectFourBitboard, m) {
         .def("reset" , &ConnectFourBitboard::reset)
         .def("getPlayerBoardState", &ConnectFourBitboard::getPlayerBoardState)
         .def("getAvailableActions", &ConnectFourBitboard::getAvailableActions)
+        .def("getAdjacentPositions", &ConnectFourBitboard::getAdjacentPositions)
         .def_readwrite("gameState", &ConnectFourBitboard::gameState)
         .def_readwrite("currentPlayer", &ConnectFourBitboard::currentPlayer);
 }

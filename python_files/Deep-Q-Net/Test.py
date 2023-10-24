@@ -22,6 +22,7 @@ def get_best_action(model, board_state):
 
     with torch.no_grad():
         q_values = model(state_tensor)
+        print(q_values)
         
         # Set the Q-values of non-available actions to a large negative value
         for action in range(7):

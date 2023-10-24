@@ -196,3 +196,39 @@ void ConnectFourBitboard::reset() {
     currentPlayer = 0;
     gameState = 0;
 }
+
+
+bool ConnectFourBitboard::isAccessible(Bitboard board, Bitboard position) {
+    if (board & position) return false;
+    if (position & 0xFF) return true;
+    if (board & (position >> 7)) return true;
+    return false;
+}
+
+
+std::vector<Bitboard> ConnectFourBitboard::getAdjacentPositions(Bitboard player, Bitboard opponent) {
+    std::vector<Bitboard> adjacencies;
+    const Bitboard Left_Column_Mask = 0x810204081;
+    const Bitboard Right_Column_Mask = 0x20408102040;
+
+    Bitboard left = ((player & ~Left_Column_Mask) >> 1) & ~(player | opponent);
+    Bitboard right = ((player & ~Right_Column_Mask) << 1) & ~(player | opponent);
+    Bitboard up = (player << 7) & ~(player | opponent);
+    Bitboard down = (player >> 7) & ~(player | opponent);
+    Bitboard upRight = up << 1 & ~Left_Column_Mask;
+    Bitboard upLeft = up >> 1 & ~Right_Column_Mask;
+    Bitboard downRight = down << 1 & ~Left_Column_Mask;
+    Bitboard downLeft = down >> 1 & ~Right_Column_Mask;
+
+    Bitboard combined = left | right | up | down | upRight | upLeft | downRight | downLeft;
+    for (Bitboard pos = 1; pos != 0; pos <<= 1) {
+        if (combined & pos) {
+            if (isAccessible(player | opponent, pos)) {
+                adjacencies.push_back(pos);
+            }
+        }
+    }
+
+    return adjacencies;
+
+}
