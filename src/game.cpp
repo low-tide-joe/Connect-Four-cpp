@@ -200,7 +200,7 @@ void ConnectFourBitboard::reset() {
 
 bool ConnectFourBitboard::isAccessible(Bitboard board, Bitboard position) {
     if (board & position) return false;
-    if (position & 0xFF) return true;
+    if (position & 0x7F) return true;
     if (board & (position >> 7)) return true;
     return false;
 }
@@ -217,10 +217,10 @@ std::vector<Bitboard> ConnectFourBitboard::getAdjacentPositions(int currentPlaye
     Bitboard right = ((player & ~Right_Column_Mask) << 1) & ~(player | opponent);
     Bitboard up = (player << 7) & ~(player | opponent);
     Bitboard down = (player >> 7) & ~(player | opponent);
-    Bitboard upRight = up << 1 & ~Left_Column_Mask;
-    Bitboard upLeft = up >> 1 & ~Right_Column_Mask;
-    Bitboard downRight = down << 1 & ~Left_Column_Mask;
-    Bitboard downLeft = down >> 1 & ~Right_Column_Mask;
+    Bitboard upRight = (up << 1) & ~Left_Column_Mask;
+    Bitboard upLeft = (up >> 1) & ~Right_Column_Mask;
+    Bitboard downRight = (down << 1) & ~Left_Column_Mask;
+    Bitboard downLeft = (down >> 1) & ~Right_Column_Mask;
 
     Bitboard combined = left | right | up | down | upRight | upLeft | downRight | downLeft;
     for (Bitboard pos = 1; pos != 0; pos <<= 1) {

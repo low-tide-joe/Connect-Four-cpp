@@ -24,15 +24,10 @@ void testAdjacentSquaresFunction() {
     ConnectFourBitboard game;
 
     game.makeMove(6);
-    game.makeMove(3);
-    game.makeMove(0);
-    game.makeMove(2);
-    game.makeMove(4);
-    game.makeMove(0);
 
     game.printBoard();
 
-    std::vector<Bitboard> adjacent = game.getAdjacentPositions(1);
+    std::vector<Bitboard> adjacent = game.getAdjacentPositions(0);
 
     for (int Bitboard : adjacent) {
         std::cout << log2(Bitboard) << "\n";

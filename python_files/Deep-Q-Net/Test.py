@@ -45,3 +45,4 @@ while test_game.gameState == 0:
     test_game.printBoard()
     player_move = int(input("Your move: "))
     test_game.makeMove(player_move)
+    

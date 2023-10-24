@@ -35,9 +35,9 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, playerBoard, opponentBoard, small_penalty=-0.01, adjacency_bonus=0.05):
+def compute_rewards(gameState, currentPlayer, adjacency_difference, adjacency_bonus=0.2):
     if gameState == 0:
-        return small_penalty
+        return (adjacency_bonus * adjacency_difference) 
     elif gameState == 1:
         return 1 if currentPlayer == 0 else -1
     elif gameState == 2:
@@ -57,7 +57,7 @@ def epsilon_greedy_policy(agent, state, epsilon, available_actions):
             return torch.argmax(q_values).item()
         
 
-def train(episodes=1000, gamma=0.70, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0):
+def train(episodes=1000, gamma=0.90, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=100):
     epsilon = epsilon_start
     for episode in range(episodes):
         game = g.ConnectFourBitboard()
@@ -75,14 +75,18 @@ def train(episodes=1000, gamma=0.70, epsilon_start=1.0, epsilon_end=0.1, epsilon
 
             # Choose action using the current_agent.
             action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
-            
+
+            adjacencies_pre = game.getAdjacentPositions(current_player)
             game.makeMove(action)
+            adjacencies_post = game.getAdjacentPositions(current_player)
+            adjacency_difference = len(adjacencies_post) - len(adjacencies_pre)
 
             player_state_next = game.getPlayerBoardState(current_player)
             opponent_state_next = game.getPlayerBoardState(opponent)
             next_state = state_to_tensor(player_state_next, opponent_state_next).unsqueeze(0)
+                        
+            reward = compute_rewards(game.gameState, current_player, adjacency_difference)
 
-            reward = compute_rewards(game.gameState, current_player)
             done = game.gameState != 0
 
             # Get target Q-value from previous_agent.
@@ -108,7 +112,5 @@ def train(episodes=1000, gamma=0.70, epsilon_start=1.0, epsilon_end=0.1, epsilon
             game.printBoard()
 
         # Occasionally update the "previous" agent to be the "current" agent.
-        if episode % 5 == 0:
+        if episode % agent_update_frequency == 0:
             previous_agent.load_state_dict(current_agent.state_dict())
-
-
