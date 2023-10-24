@@ -8,18 +8,39 @@ import random
 
 class QNetwork(nn.Module):
     def __init__(self):
-        fc_layer_size = 256
         super(QNetwork, self).__init__()
-        self.conv1 = nn.Conv2d(2, fc_layer_size, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(fc_layer_size * 6 * 7, fc_layer_size)
-        self.fc2 = nn.Linear(fc_layer_size, 7)        
+        
+        fc_layer_size = 128
+        
+        # Convolutional Layers
+        self.conv1 = nn.Conv2d(2, 16, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+
+        # Fully Connected Layers
+        self.fc1 = nn.Linear(32 * 6 * 7, fc_layer_size)
+        self.fc2 = nn.Linear(fc_layer_size, 7)
+
+        # Dropout layer
+        self.dropout = nn.Dropout(0.3)       
+
+        # Weight Initialization
+        nn.init.kaiming_uniform_(self.conv1.weight, nonlinearity='relu')
+        nn.init.kaiming_uniform_(self.conv2.weight, nonlinearity='relu')
+        nn.init.kaiming_uniform_(self.fc1.weight, nonlinearity='relu')
+        nn.init.kaiming_uniform_(self.fc2.weight, nonlinearity='relu')
+
+        # Explicit bias initialization
+        nn.init.zeros_(self.conv1.bias)
+        nn.init.zeros_(self.conv2.bias)
+        nn.init.zeros_(self.fc1.bias)
+        nn.init.zeros_(self.fc2.bias)
     
-    def forward(self, state):
-        x = F.relu(self.conv1(state))
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
         x = x.view(x.size(0), -1)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+        x = self.dropout(F.relu(self.fc1(x)))
+        return self.fc2(x)
 
 
 def bitboard_to_tensor(bitboard):
@@ -35,11 +56,11 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, adjacency_difference, adjacency_bonus=0.2):
+def compute_rewards(gameState, currentPlayer, adjacency_difference, win_reward=5, adjacency_bonus=2):
     if gameState == 0:
         return (adjacency_bonus * adjacency_difference) 
     elif gameState == 1:
-        return 1 if currentPlayer == 0 else -1
+        return win_reward if currentPlayer == 0 else -win_reward
     elif gameState == 2:
         return 0
     
@@ -57,7 +78,7 @@ def epsilon_greedy_policy(agent, state, epsilon, available_actions):
             return torch.argmax(q_values).item()
         
 
-def train(episodes=1000, gamma=0.90, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=100):
+def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=100):
     epsilon = epsilon_start
     for episode in range(episodes):
         game = g.ConnectFourBitboard()
@@ -76,8 +97,12 @@ def train(episodes=1000, gamma=0.90, epsilon_start=1.0, epsilon_end=0.1, epsilon
             # Choose action using the current_agent.
             action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
 
+            # Get the list of adjacencies for the pre-move board state
             adjacencies_pre = game.getAdjacentPositions(current_player)
+
             game.makeMove(action)
+
+            # Get the list of adjacencies post-move and calculate the difference
             adjacencies_post = game.getAdjacentPositions(current_player)
             adjacency_difference = len(adjacencies_post) - len(adjacencies_pre)
 
