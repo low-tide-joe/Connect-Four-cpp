@@ -32,7 +32,7 @@ void testAdjacentSquaresFunction() {
 
     game.printBoard();
 
-    std::vector<Bitboard> adjacent = game.getAdjacentPositions(game.getPlayerBoardState(1), game.getPlayerBoardState(0));
+    std::vector<Bitboard> adjacent = game.getAdjacentPositions(1);
 
     for (int Bitboard : adjacent) {
         std::cout << log2(Bitboard) << "\n";
@@ -41,6 +41,10 @@ void testAdjacentSquaresFunction() {
 
 
 int main() {
+
+    testAdjacentSquaresFunction();
+    return 0;
+
     ConnectFourBitboard game;
     int randomMove;
     int player1WinCount = 0;

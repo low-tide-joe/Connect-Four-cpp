@@ -206,10 +206,12 @@ bool ConnectFourBitboard::isAccessible(Bitboard board, Bitboard position) {
 }
 
 
-std::vector<Bitboard> ConnectFourBitboard::getAdjacentPositions(Bitboard player, Bitboard opponent) {
+std::vector<Bitboard> ConnectFourBitboard::getAdjacentPositions(int currentPlayer) {
     std::vector<Bitboard> adjacencies;
     const Bitboard Left_Column_Mask = 0x810204081;
     const Bitboard Right_Column_Mask = 0x20408102040;
+    Bitboard player = getPlayerBoardState(currentPlayer);
+    Bitboard opponent = getPlayerBoardState(1 - currentPlayer);
 
     Bitboard left = ((player & ~Left_Column_Mask) >> 1) & ~(player | opponent);
     Bitboard right = ((player & ~Right_Column_Mask) << 1) & ~(player | opponent);

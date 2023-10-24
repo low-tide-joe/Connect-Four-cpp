@@ -28,6 +28,6 @@ public:
   void reset();  
   Bitboard getPlayerBoardState(int player);
   const std::vector<int>& getAvailableActions();
-  std::vector<Bitboard> getAdjacentPositions(Bitboard player, Bitboard opponent);
+  std::vector<Bitboard> getAdjacentPositions(int currentPlayer);
   
 };

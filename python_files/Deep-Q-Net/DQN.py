@@ -35,7 +35,7 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, small_penalty=-0.05):
+def compute_rewards(gameState, currentPlayer, playerBoard, opponentBoard, small_penalty=-0.01, adjacency_bonus=0.05):
     if gameState == 0:
         return small_penalty
     elif gameState == 1:
