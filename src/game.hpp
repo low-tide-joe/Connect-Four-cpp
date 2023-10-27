@@ -18,6 +18,7 @@ private:
   bool checkWin(Bitboard board);
   bool isBoardFull();
   std::vector<int> availableActions;
+  bool isAccessible(Bitboard board, Bitboard position);
 
 public:
   int gameState = 0;
@@ -27,5 +28,6 @@ public:
   void reset();  
   Bitboard getPlayerBoardState(int player);
   const std::vector<int>& getAvailableActions();
+  std::vector<Bitboard> getAdjacentPositions(int currentPlayer);
   
 };

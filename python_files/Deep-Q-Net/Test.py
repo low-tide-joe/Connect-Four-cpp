@@ -47,3 +47,4 @@ while test_game.gameState == 0:
     while player_move not in test_game.getAvailableActions():
         player_move = int(input("Invalid Move, try again: "))
     test_game.makeMove(player_move)
+    

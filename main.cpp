@@ -1,6 +1,7 @@
 #include <random>
 #include <bitset>
 #include "src/game.cpp"
+#include "math.h"
 
 int chooseRandomColumn(const std::vector<int> &availableActions) {
     static std::random_device rd;
@@ -19,8 +20,26 @@ int chooseRandomColumn(const std::vector<int> &availableActions) {
 }
 
 
+void testAdjacentSquaresFunction() {
+    ConnectFourBitboard game;
+
+    game.makeMove(6);
+
+    game.printBoard();
+
+    std::vector<Bitboard> adjacent = game.getAdjacentPositions(0);
+
+    for (int Bitboard : adjacent) {
+        std::cout << log2(Bitboard) << "\n";
+    }    
+}
+
 
 int main() {
+
+    testAdjacentSquaresFunction();
+    return 0;
+
     ConnectFourBitboard game;
     int randomMove;
     int player1WinCount = 0;

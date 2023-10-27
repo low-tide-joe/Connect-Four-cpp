@@ -16,9 +16,11 @@ previous_agent = QNetwork().to(device)
 previous_agent.load_state_dict(current_agent.state_dict())
 previous_agent.eval()
 
-optimizer = optim.Adam(current_agent.parameters(), lr=0.05)
+optimizer = optim.Adam(current_agent.parameters(), lr=0.01)
 criterion = nn.MSELoss()
 
-train(episodes=10, current_agent=current_agent, previous_agent=previous_agent, criterion=criterion, optimizer=optimizer, agent_update_rate=100)
+
+train(episodes=1000, current_agent=current_agent, previous_agent=previous_agent, criterion=criterion, optimizer=optimizer, agent_update_frequency=100)
+
 
 torch.save(current_agent.state_dict(), model_path)
