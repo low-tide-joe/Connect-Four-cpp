@@ -22,6 +22,7 @@ def get_best_action(model, board_state):
 
     with torch.no_grad():
         q_values = model(state_tensor)
+        print(q_values)
         
         # Set the Q-values of non-available actions to a large negative value
         for action in range(7):
@@ -43,4 +44,6 @@ while test_game.gameState == 0:
     test_game.makeMove(action)
     test_game.printBoard()
     player_move = int(input("Your move: "))
+    while player_move not in test_game.getAvailableActions():
+        player_move = int(input("Invalid Move, try again: "))
     test_game.makeMove(player_move)
