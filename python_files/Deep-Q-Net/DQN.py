@@ -3,44 +3,51 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import random 
+import numpy as np
 
 
 class QNetwork(nn.Module):
     def __init__(self):
         super(QNetwork, self).__init__()
         
-        fc_layer_size = 128
-        
         # Convolutional Layers
-        self.conv1 = nn.Conv2d(2, 16, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(2, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
 
         # Fully Connected Layers
-        self.fc1 = nn.Linear(32 * 6 * 7, fc_layer_size)
-        self.fc2 = nn.Linear(fc_layer_size, 7)
+        self.fc1 = nn.Linear(128 * 6 * 7, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, 7)
 
         # Dropout layer
-        self.dropout = nn.Dropout(0.3)       
+        self.dropout1 = nn.Dropout(0.4)       
+        self.dropout2 = nn.Dropout(0.3)
+
+        # Batch Normalisation 
+        self.bn1 = nn.BatchNorm2d(32)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.bn3 = nn.BatchNorm2d(128)
 
         # Weight Initialization
-        nn.init.kaiming_uniform_(self.conv1.weight, nonlinearity='relu')
-        nn.init.kaiming_uniform_(self.conv2.weight, nonlinearity='relu')
-        nn.init.kaiming_uniform_(self.fc1.weight, nonlinearity='relu')
-        nn.init.kaiming_uniform_(self.fc2.weight, nonlinearity='relu')
-
-        # Explicit bias initialization
-        nn.init.zeros_(self.conv1.bias)
-        nn.init.zeros_(self.conv2.bias)
-        nn.init.zeros_(self.fc1.bias)
-        nn.init.zeros_(self.fc2.bias)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+                nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.Linear):
+                nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+                nn.init.zeros_(m.bias)
     
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
+        x = self.bn1(F.relu(self.conv1(x)))
+        x = self.bn2(F.relu(self.conv2(x)))
+        x = self.bn3(F.relu(self.conv3(x)))
+        
         x = x.view(x.size(0), -1)
-        x = self.dropout(F.relu(self.fc1(x)))
-        return self.fc2(x)
+
+        x = self.dropout1(F.relu(self.fc1(x)))
+        x = self.dropout2(F.relu(self.fc2(x)))
+        return self.fc3(x)
 
 
 def bitboard_to_tensor(bitboard):
@@ -56,18 +63,18 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, adjacency_difference, win_reward=5, adjacency_bonus=2):
+def compute_rewards(gameState, currentPlayer, adjacency_difference, win_reward=1, adjacency_bonus=0.1):
     if gameState == 0:
         return (adjacency_bonus * adjacency_difference) 
     elif gameState == 1:
-        return win_reward if currentPlayer == 0 else -win_reward
+        return win_reward if currentPlayer == 0 else (-1 * win_reward)
     elif gameState == 2:
         return 0
     
     
 def epsilon_greedy_policy(agent, state, epsilon, available_actions):
-    if random.uniform(0, 1) < epsilon:
-        return random.choice(available_actions)
+    if np.random.uniform(0, 1) < epsilon:
+        return np.random.choice(available_actions)
     else:
         with torch.no_grad():
             q_values = agent(state)
@@ -78,7 +85,11 @@ def epsilon_greedy_policy(agent, state, epsilon, available_actions):
             return torch.argmax(q_values).item()
         
 
-def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=100):
+def random_policy(available_actions):
+    return np.random.choice(available_actions)
+        
+
+def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=1000):
     epsilon = epsilon_start
     for episode in range(episodes):
         game = g.ConnectFourBitboard()
@@ -95,7 +106,11 @@ def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon
             available_actions = game.getAvailableActions()
 
             # Choose action using the current_agent.
-            action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
+            if current_player == 0:
+                action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
+            elif current_player == 1:
+                # action = random_policy(available_actions)
+                action = epsilon_greedy_policy(previous_agent, state, epsilon, available_actions)
 
             # Get the list of adjacencies for the pre-move board state
             adjacencies_pre = game.getAdjacentPositions(current_player)
@@ -132,10 +147,11 @@ def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon
         # Update epsilon
         epsilon = max(epsilon_end, epsilon * epsilon_decay)
 
-        if (episode % 10) == 0:
+        if (episode % 10) == 0 or (episode == episodes - 1):
             print("Game number " + str(episode) + " reached")
             game.printBoard()
 
         # Occasionally update the "previous" agent to be the "current" agent.
         if episode % agent_update_frequency == 0:
             previous_agent.load_state_dict(current_agent.state_dict())
+            previous_agent.eval()
