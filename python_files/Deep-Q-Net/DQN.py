@@ -63,12 +63,12 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, adjacency_difference, connection, win_reward=1, adjacency_bonus=0.1, connection_bonus=0.4, small_penalty=-0.05):
+def compute_rewards(gameState, currentPlayer, adjacency_difference, connection, win_reward=1, adjacency_bonus=0.2, connection_bonus=0.6, small_penalty=-0.05):
     if gameState == 0:
         if connection == False: connection_bonus = 0
         return (adjacency_bonus * adjacency_difference) + connection_bonus + small_penalty
     elif gameState == 1:
-        return win_reward # if currentPlayer == 0 else (-1 * win_reward)
+        return 0 #win_reward
     elif gameState == 2:
         return 0
     
@@ -99,7 +99,7 @@ def random_policy(available_actions):
     return np.random.choice(available_actions)
         
 
-def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.999, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=10):
+def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=100):
     epsilon = epsilon_start
     for episode in range(episodes):
         game = g.ConnectFourBitboard()
