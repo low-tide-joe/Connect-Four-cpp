@@ -127,7 +127,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="ConnectFourBitboard",
-    version="0.0.6",
+    version="0.0.7",
     author="Low Tide Joe",
     author_email="joe20joe@gmail.com",
     description="A connect four simulator for python built in C++",

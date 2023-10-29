@@ -3,6 +3,7 @@ from DQN import state_to_tensor
 from DQN import random_policy
 import ConnectFourBitboard as g
 import torch
+import numpy as np
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -74,8 +75,17 @@ def test_vs_random(num_games=100):
     print(f"We played {num_games} games.\nAI Agent wins: {agent_wins}\nRandom Agent wins: {random_wins}\nDraws: {draws}\nAgent Win Rate = {agent_wins / (agent_wins + random_wins)}")
         
 
+def get_adjacent_action_column(adjacencies):
+    adjacent_actions = []
+    for i in adjacencies:
+        column = np.log2(i) % 7
+        adjacent_actions.append(column)
+    # returns adjacent actions as a list of integers
+    return sorted([int(x) for x in adjacent_actions])
+
 
 # test_vs_human()
 test_vs_random(num_games=1000)
+
 
 

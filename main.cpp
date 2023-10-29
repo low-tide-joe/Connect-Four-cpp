@@ -23,7 +23,13 @@ int chooseRandomColumn(const std::vector<int> &availableActions) {
 void testAdjacentSquaresFunction() {
     ConnectFourBitboard game;
 
+    game.makeMove(3);
+    game.makeMove(3);
+    game.makeMove(2);
+    game.makeMove(4);
     game.makeMove(6);
+    game.makeMove(3);
+    game.makeMove(0);
 
     game.printBoard();
 

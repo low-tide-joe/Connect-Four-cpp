@@ -63,13 +63,23 @@ def state_to_tensor(player_state, opponent_state):
     return torch.stack([player_tensor, opponent_tensor])
 
 
-def compute_rewards(gameState, currentPlayer, adjacency_difference, win_reward=1, adjacency_bonus=0.1):
+def compute_rewards(gameState, currentPlayer, adjacency_difference, connection, win_reward=1, adjacency_bonus=0.1, connection_bonus=0.4, small_penalty=-0.05):
     if gameState == 0:
-        return (adjacency_bonus * adjacency_difference) 
+        if connection == False: connection_bonus = 0
+        return (adjacency_bonus * adjacency_difference) + connection_bonus + small_penalty
     elif gameState == 1:
-        return win_reward if currentPlayer == 0 else (-1 * win_reward)
+        return win_reward # if currentPlayer == 0 else (-1 * win_reward)
     elif gameState == 2:
         return 0
+    
+
+def get_adjacent_action_column(adjacencies):
+    adjacent_actions = []
+    for i in adjacencies:
+        column = np.log2(i) % 7
+        adjacent_actions.append(column)
+    # returns adjacent actions as a sorted list of integers
+    return sorted([int(x) for x in adjacent_actions])
     
     
 def epsilon_greedy_policy(agent, state, epsilon, available_actions):
@@ -89,7 +99,7 @@ def random_policy(available_actions):
     return np.random.choice(available_actions)
         
 
-def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.99, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=1000):
+def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon_decay=0.999, current_agent=0, previous_agent=0, criterion=0, optimizer=0, agent_update_frequency=10):
     epsilon = epsilon_start
     for episode in range(episodes):
         game = g.ConnectFourBitboard()
@@ -106,14 +116,17 @@ def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon
             available_actions = game.getAvailableActions()
 
             # Choose action using the current_agent.
-            if current_player == 0:
-                action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
-            elif current_player == 1:
-                # action = random_policy(available_actions)
-                action = epsilon_greedy_policy(previous_agent, state, epsilon, available_actions)
+            action = epsilon_greedy_policy(current_agent, state, epsilon, available_actions)
 
             # Get the list of adjacencies for the pre-move board state
             adjacencies_pre = game.getAdjacentPositions(current_player)
+
+            # Get the list of actions that would result in creating a conneciton 
+            actions_resulting_in_connection = get_adjacent_action_column(adjacencies_pre)
+            if action in actions_resulting_in_connection:
+                connection = True
+            else:
+                connection = False
 
             game.makeMove(action)
 
@@ -125,7 +138,7 @@ def train(episodes=1000, gamma=0.99, epsilon_start=1.0, epsilon_end=0.1, epsilon
             opponent_state_next = game.getPlayerBoardState(opponent)
             next_state = state_to_tensor(player_state_next, opponent_state_next).unsqueeze(0)
                         
-            reward = compute_rewards(game.gameState, current_player, adjacency_difference)
+            reward = compute_rewards(game.gameState, current_player, adjacency_difference, connection)
 
             done = game.gameState != 0
 
