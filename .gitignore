@@ -11,3 +11,4 @@ __pycache__
 model_states
 minimax.exe
 a.out
+checkpoints/
