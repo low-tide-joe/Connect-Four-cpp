@@ -92,3 +92,15 @@ alpha_zero/
     evaluate.py     — win rate evaluation vs random agent
     play_human.py   — interactive terminal play
 ```
+
+### Old C++ Docs
+
+To generate the wheel files using cmake:
+* git clone https://github.com/pybind/pybind11.git
+* mkdir build
+* cd build
+* cmake ..
+* make game
+* make ConnectFourBitboard
+* if all the above worked then: "python ../setup.py bdist_wheel" should work
+* pip install ../dist/ConnectFourBitboard[version].whl
