@@ -143,7 +143,7 @@ def run_alpha_zero(config: AlphaZeroConfig = None, device: str = "cpu"):
 if __name__ == "__main__":
     import torch
 
-    device = "cpu"  # GTX 1080 Ti (sm_61) not supported by current PyTorch; use CPU
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
     config = AlphaZeroConfig()  # uses defaults from config.py
     network = run_alpha_zero(config, device=device)

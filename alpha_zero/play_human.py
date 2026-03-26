@@ -88,5 +88,5 @@ if __name__ == "__main__":
         print("Usage: uv run python -m alpha_zero.play_human <checkpoint_path>")
         sys.exit(1)
 
-    device = "cpu"  # set to "cuda" if you have a compatible GPU
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     play_vs_human(sys.argv[1], device=device)
