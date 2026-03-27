@@ -27,13 +27,11 @@ def train_network(network: ConnectFourNet, replay_buffer: ReplayBuffer,
     total_value_loss = 0.0
     n_batches = 0
 
-    # Shuffle all data once per epoch pass
     all_data = list(replay_buffer._buffer)
-    random.shuffle(all_data)
-
     n_batches_per_epoch = max(1, len(all_data) // config.batch_size)
     with tqdm(total=config.num_epochs * n_batches_per_epoch, desc="  Training", unit="batch", leave=False) as pbar:
         for epoch in range(config.num_epochs):
+            random.shuffle(all_data)  # re-shuffle each epoch for different batch compositions
             for i in range(0, len(all_data), config.batch_size):
                 batch = all_data[i: i + config.batch_size]
                 if not batch:

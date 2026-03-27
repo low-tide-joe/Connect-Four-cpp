@@ -36,7 +36,9 @@ class MCTSNode:
         sqrt_parent_visits = math.sqrt(self.visit_count)
 
         for child in self.children.values():
-            puct = child.value() + c_puct * child.prior * sqrt_parent_visits / (1 + child.visit_count)
+            # child.value() is from child's current_player's perspective (the opponent).
+            # Negate it so we're maximizing from the parent's (our) perspective.
+            puct = -child.value() + c_puct * child.prior * sqrt_parent_visits / (1 + child.visit_count)
             if puct > best_score:
                 best_score = puct
                 best_child = child
@@ -104,7 +106,9 @@ class MCTS:
         policy = self._mask_and_normalize(policy, game_state.get_valid_moves())
 
         if add_dirichlet_noise:
-            noise = np.random.dirichlet([dirichlet_alpha] * COLS)
+            valid_indices = np.where(game_state.get_valid_moves())[0]
+            noise = np.zeros(COLS)
+            noise[valid_indices] = np.random.dirichlet([dirichlet_alpha] * len(valid_indices))
             policy = (1 - dirichlet_weight) * policy + dirichlet_weight * noise
             policy = self._mask_and_normalize(policy, game_state.get_valid_moves())
 
@@ -119,9 +123,10 @@ class MCTS:
 
             # 2. Evaluate: if not terminal, expand and get a value estimate
             if node.game_state.is_terminal():
-                # Terminal node: value is the result from the perspective of the
-                # PARENT (the player who made the last move, which ended the game)
-                result = node.game_state.get_result(-node.game_state.current_player)
+                # Terminal node: value from the perspective of node.game_state.current_player
+                # (the player whose turn it would be next — i.e., the one who did NOT make
+                # the last move). backpropagate() will negate as it ascends to the parent.
+                result = node.game_state.get_result(node.game_state.current_player)
                 value = result if result is not None else 0.0
             else:
                 policy, value = self.evaluate_fn(node.game_state)
