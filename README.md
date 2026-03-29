@@ -1,4 +1,4 @@
-# Delta Connect
+# Alpha Connect
 
 A Connect Four RL agent trained entirely through self-play, inspired by AlphaGo/AlphaZero. The agent learns with no hand-crafted heuristics — only win/loss/draw outcomes.
 
